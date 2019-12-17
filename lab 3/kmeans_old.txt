@@ -1,0 +1,63 @@
+function [segmentation, centers] = kmeans_segm(image, K, L, seed)
+% Let X (image) be a set of pixels and V be a set of K cluster centers in 3D (R,G,B).
+%------------------------------------------------------------------------------------
+[rows, columns, numberOfColorChannels] = size(image);
+% Randomly initialize the K cluster centers
+V = [];
+for i = 1:K
+    V = [V randi(255,3,1)];
+end
+
+distances = zeros(rows);
+kluster = zeros(rows);
+for counter = 1:L
+    % Compute all distances between pixels and cluster centers
+    for row = 1:rows
+        for column = 1:columns
+            smallest_distance = sqrt(double(power(image(row, column,1)-V(1,1),2) + power(image(row, column,2)-V(1,2),2) + power(image(row, column,3)-V(1,3),2)));
+            smallest_kluster_index = 0; 
+            for kluster_index = 2:K
+                distance = sqrt(double(power(image(row, column,1)-V(kluster_index,1),2) + power(image(row, column,2)-V(kluster_index,2),2) + power(image(row, column,3)-V(kluster_index,3),2)));
+                if distance < smallest_distance
+                    smallest_kluster_index = kluster_index;
+                    smallest_distance = distance;
+                end
+            end
+            distances(row, column) = smallest_distance;
+            kluster(row, column) = smallest_kluster_index;
+        end
+    end
+    % Iterate L times:
+    %   Assign each pixel to the cluster center for which the distance is minimum
+    %   Recompute each cluster center by taking the mean of all pixels assigned to it
+    for kluster_index = 1:K
+        avrage_r = [];
+        avrage_g = [];
+        avrage_b = [];
+        for row = 1:rows
+            for column = 1:columns
+                kl = kluster(row, column);
+                if kl == kluster_index
+                   avrage_r = [avrage_r image(row, column, 1)];
+                   avrage_g = [avrage_g image(row, column, 2)];
+                   avrage_b = [avrage_b image(row, column, 3)];
+                end
+            end
+        end
+        V(kluster_index, 1) = mean(avrage_r);
+        V(kluster_index, 2) = mean(avrage_g);
+        V(kluster_index, 3) = mean(avrage_b);
+    end
+
+end
+
+%   Recompute all distances between pixels and cluster centers
+ %segmentation = zeros(rows);
+
+for row = 1:rows
+    for column = 1: columns
+        image(row, column) = kluster(row, column);
+    end
+end
+segmentation = image;
+end

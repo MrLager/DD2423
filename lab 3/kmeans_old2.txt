@@ -1,0 +1,90 @@
+clear
+image = imread('fruit.jpg');
+
+K = 10;
+L = 15;
+seed = 210;
+
+% get the size of the image
+[width, height, ncolors] = size(image);
+
+% change the image representaion from 3d -> 2d.
+image2d = reshape(double(image), width*height, 3);
+
+% add a column to store the cluster that each pixel belongs to
+%image2dWclusters = [image2d zeros(width*height, 1)];
+pixelsBellongingToCenters = zeros(width*height,3,K);
+    
+% feed the random number generator with a seed
+rng(seed);
+    
+% initiate K random selected clusters
+%centersold = randi([0 255],K, 3);
+%centers = image2d(randi([0 width*height], 1, K))
+centers = datasample(image2d(:,:), K)
+
+% test code
+%image2dWclusters(1,2)
+for l = 1:L
+    [distances, indexes] = min(pdist2(centers, image2d));
+
+    for Kindex = 1:K
+        centers(Kindex, :) = mean(image2d(indexes(:)==Kindex, :));
+    end
+end
+
+centersVar = uint8(centers(indexes(:), :));
+segmentation = reshape(centersVar, [width, height, 3]);
+
+imshow(segmentation)
+% centers(Kindex, :) = fillmissing(mean(image2d(indexes(:)==Kindex, :)),'constant', randi([0 255]))
+
+% % rebuild image
+% segmentation = zeros(width*height, 3);
+% for pixelIndex = 1:width*height
+%     segmentation(pixelIndex, :) = centers(indexes(pixelIndex), :);
+% end
+% segmentation = reshape(segmentation, width, height);
+
+
+% Compute all distances between pixels and cluster centers
+% for pixelIndex = 1:width*height
+%     distances = zeros(K,1);
+%     for Kindex = 1:K
+%         distances(Kindex) = power(image2dWclusters(pixelIndex, 1)-centers(Kindex, 1), 2) + power(image2dWclusters(pixelIndex, 2)-centers(Kindex, 2), 2) + power(image2dWclusters(pixelIndex, 3)-centers(Kindex, 3), 2);
+%     end
+%     [minval, minindex] = min(distances);
+%      %   Assign each pixel to the cluster center for which the distance is minimum
+%     image2dWclusters(pixelIndex, 4) = minindex;
+% %     image2dWclusters(pixelIndex, :)
+% %     pixelsBellongingToCenters(:, :, minindex)
+% %     pixelsBellongingToCenters(:, :, minindex) = image2dWclusters(pixelIndex, :)
+% end 
+
+% Iterate L times
+for Lindex = 1:L
+    %   Recompute each cluster center by taking the mean of all pixels assigned to it
+%     for Kindex = 1:K
+%         if isnan(mean(image2dWclusters(image2dWclusters(:, 4)==Kindex, 1:3)))
+%             % generate a new random value
+%         else
+%            centers(Kindex, :) = mean(image2dWclusters(image2dWclusters(:, 4)==Kindex, 1:3));
+%         end
+%     end
+%     
+    
+    
+    %   Recompute all distances between pixels and cluster centers
+%     for pixelIndex = 1:width*height
+%         distances = zeros(K,1);
+%         for Kindex = 1:K
+%             distances(Kindex) = power(image2dWclusters(pixelIndex, 1)-centers(Kindex, 1), 2) + power(image2dWclusters(pixelIndex, 2)-centers(Kindex, 2), 2) + power(image2dWclusters(pixelIndex, 3)-centers(Kindex, 3), 2);
+%         end
+%         [minval, minindex] = min(distances);
+%          %   Assign each pixel to the cluster center for which the distance is minimum
+%         image2dWclusters(pixelIndex, 4) = minindex;
+%     %     image2dWclusters(pixelIndex, :)
+%     %     pixelsBellongingToCenters(:, :, minindex)
+%     %     pixelsBellongingToCenters(:, :, minindex) = image2dWclusters(pixelIndex, :)
+%     end 
+end
